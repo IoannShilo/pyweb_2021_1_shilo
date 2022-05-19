@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from blog.models import Note
+from rest_framework.generics import ListAPIView
 from rest_framework import status
+from blog.models import Note
 from django.shortcuts import get_object_or_404
 from . import serializers
 
@@ -11,16 +12,30 @@ class NoteListCreateAPIView(APIView):
 
     def get(self, request):
         obj = Note.objects.all()
+        serializer = serializers.NoteSerializer(instance=obj, many=True)
 
-        return Response([serializers.note_to_json(note) for note in obj])
+        return Response(serializer.data)
 
     def post(self, request):
-        data = request.data
-        note = Note(**data)
+        serializer = serializers.NoteSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=request.user)
 
-        note.save(force_insert=True)
+        return Response(
+            serializer.data
+        )
 
-        return Response(serializers.note_created(note), status=status.HTTP_201_CREATED)
+
+class PublicNoteListAPIView(ListAPIView):
+    queryset = Note.objects.all()
+    serializer_class = serializers.NoteSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(public=True)
+
 
 class NoteDetailAPIView(APIView):
 
