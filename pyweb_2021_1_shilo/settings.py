@@ -79,7 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pyweb_2021_1_shilo.wsgi.application'
 
-
+VERSION_SERVER = 'server1234556'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
