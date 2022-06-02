@@ -8,7 +8,7 @@ from blog.models import Note
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        exclude = ('public',)
+        fields = '__all__'
         read_only_fields = ("author", )
 
 

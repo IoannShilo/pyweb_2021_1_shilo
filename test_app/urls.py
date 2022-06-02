@@ -18,6 +18,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('datetime/', views.DatetimeView.as_view()),
+    path('about/', views.DatetimeView.as_view()),
     path('randint/', views.RandomintView.as_view()),
 ]

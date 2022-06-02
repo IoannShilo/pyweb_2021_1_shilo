@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from datetime import datetime, timedelta
+
+
+def datetime_():
+    return datetime.now() + timedelta(days=1)
 
 
 class Note(models.Model):
@@ -14,6 +19,7 @@ class Note(models.Model):
     important = models.BooleanField(default=False, verbose_name=_('Важно'))
     public = models.BooleanField(default=False, verbose_name=_('Публичная'))
     create_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Время создания'))
+    deadline = models.DateField(default=datetime_, verbose_name=_('Выполнить до'))
     status = models.IntegerField(default=Status.ACTIVE, choices=Status.choices, verbose_name=_('Статус'))
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -24,4 +30,4 @@ class Note(models.Model):
     class Meta:
         verbose_name = _("Заметка")
         verbose_name_plural = _("Заметки")
-
+        ordering = ['-create_at', '-important']

@@ -6,14 +6,14 @@ from .models import Note
 class NoteAdmin(admin.ModelAdmin):
     # Поля в списке
     list_display = (
-        'title', 'create_at', 'status', 'author', 'public', 'important'
+        'title', 'create_at', 'deadline', 'status', 'author', 'public', 'important'
 
     )
     # #
     # # # Группировка поля в режиме редактирования
-    fields = (('title', 'public', 'important'), ('status', ), ('author', ), 'create_at')
+    fields = (('title', 'public', 'important'), ('deadline'), ('status', ), ('author', ), 'create_at')
     # Поля только для чтения в режиме редактирования
-    readonly_fields = ('create_at', 'author')
+    readonly_fields = ('author', 'create_at')
     # #
     # Поиск по выбранным полям
     search_fields = ['title',]
@@ -33,3 +33,9 @@ class NoteAdmin(admin.ModelAdmin):
         return queryset\
             .prefetch_related("author")\
             .order_by('-create_at', '-important')
+
+    def save_model(self, request, obj, form, change):
+
+        if not hasattr(obj, 'author') or not obj.author:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
