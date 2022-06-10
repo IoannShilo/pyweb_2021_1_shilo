@@ -30,5 +30,3 @@ class NoteDetailSerializer(serializers.ModelSerializer):
 
 
 
-
-

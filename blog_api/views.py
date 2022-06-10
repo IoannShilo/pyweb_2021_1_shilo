@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework import status
@@ -17,16 +18,22 @@ class NoteListCreateAPIView(APIView):
         serializer = serializers.NoteSerializer(instance=obj, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = serializers.NoteSerializer(
-            data=request.data
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+    def post(self, request: Request):
 
+        serializer = serializers.NoteSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer.save(author=request.user)
         return Response(
-            serializer.data
+            serializer.data,
+            status=status.HTTP_201_CREATED
         )
+
 
 
 class NoteDetailAPIView(APIView):
@@ -43,7 +50,7 @@ class NoteDetailAPIView(APIView):
 
         note = Note.objects.filter(pk=pk, author=request.user).first()
         if not note:
-            raise NotFound(f'Статья с id={id} для пользователя {request.user.username} не найдена')
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         new_note = serializers.NoteDetailSerializer(note, data=request.data, partial=True)
 
@@ -55,8 +62,11 @@ class NoteDetailAPIView(APIView):
 
     def delete(self, request, pk):
         note = Note.objects.filter(pk=pk, author=request.user)
-        note.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if not note:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            note.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PublicNoteListAPIView(ListAPIView):
